@@ -132,6 +132,8 @@ async function startGateway() {
   await runCmd(MOLTBOT_NODE, clawArgs(["config", "set", "gateway.bind", "loopback"]));
   await runCmd(MOLTBOT_NODE, clawArgs(["config", "set", "gateway.port", String(INTERNAL_GATEWAY_PORT)]));
   await runCmd(MOLTBOT_NODE, clawArgs(["config", "set", "gateway.controlUi.allowInsecureAuth", "true"]));
+  // Trust Railway proxy for local client detection
+  await runCmd(MOLTBOT_NODE, clawArgs(["config", "set", "--json", "gateway.trustedProxies", '["127.0.0.1", "::1", "100.64.0.0/10"]']));
   console.log("[gateway] config set complete");
 
   const args = [
@@ -865,6 +867,13 @@ app.use(async (req, res) => {
         .type("text/plain")
         .send(`Gateway not ready: ${String(err)}`);
     }
+  }
+
+  // For Control UI access, redirect to tokenized URL if token not present
+  // This allows the browser-side JavaScript to authenticate WebSocket connections
+  if ((req.path === "/moltbot" || req.path === "/moltbot/") && !req.query.token) {
+    const tokenizedUrl = `/moltbot?token=${encodeURIComponent(MOLTBOT_GATEWAY_TOKEN)}`;
+    return res.redirect(tokenizedUrl);
   }
 
   // Proxy to gateway (auth token injected via proxyReq event)
