@@ -127,8 +127,9 @@ async function startGateway() {
   // Ensure gateway config is properly set (fixes openclaw rename migration)
   console.log("[gateway] ensuring config is set correctly...");
   await runCmd(MOLTBOT_NODE, clawArgs(["config", "set", "gateway.mode", "local"]));
-  // Disable auth to allow Control UI access (wrapper handles external auth via SETUP_PASSWORD)
-  await runCmd(MOLTBOT_NODE, clawArgs(["config", "set", "gateway.auth.mode", "none"]));
+  // Re-enable token auth (auth.mode=none doesn't work with openclaw)
+  await runCmd(MOLTBOT_NODE, clawArgs(["config", "set", "gateway.auth.mode", "token"]));
+  await runCmd(MOLTBOT_NODE, clawArgs(["config", "set", "gateway.auth.token", MOLTBOT_GATEWAY_TOKEN]));
   await runCmd(MOLTBOT_NODE, clawArgs(["config", "set", "gateway.bind", "loopback"]));
   await runCmd(MOLTBOT_NODE, clawArgs(["config", "set", "gateway.port", String(INTERNAL_GATEWAY_PORT)]));
   await runCmd(MOLTBOT_NODE, clawArgs(["config", "set", "gateway.controlUi.allowInsecureAuth", "true"]));
@@ -143,8 +144,10 @@ async function startGateway() {
     "loopback",
     "--port",
     String(INTERNAL_GATEWAY_PORT),
-    // Auth disabled - wrapper handles external authentication via SETUP_PASSWORD
-    "--allow-unconfigured",
+    "--auth",
+    "token",
+    "--token",
+    MOLTBOT_GATEWAY_TOKEN,
   ];
 
   gatewayProc = childProcess.spawn(MOLTBOT_NODE, clawArgs(args), {
@@ -865,6 +868,13 @@ app.use(async (req, res) => {
         .type("text/plain")
         .send(`Gateway not ready: ${String(err)}`);
     }
+  }
+
+  // For Control UI access, redirect to tokenized URL if token not present
+  // This allows the browser-side JavaScript to authenticate WebSocket connections
+  if ((req.path === "/moltbot" || req.path === "/moltbot/") && !req.query.token) {
+    const tokenizedUrl = `/moltbot?token=${encodeURIComponent(MOLTBOT_GATEWAY_TOKEN)}`;
+    return res.redirect(tokenizedUrl);
   }
 
   // Proxy to gateway
