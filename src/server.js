@@ -128,6 +128,7 @@ async function startGateway() {
     "token",
     "--token",
     MOLTBOT_GATEWAY_TOKEN,
+    "--allow-unconfigured",
   ];
 
   gatewayProc = childProcess.spawn(MOLTBOT_NODE, clawArgs(args), {
