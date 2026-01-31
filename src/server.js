@@ -117,6 +117,16 @@ async function startGateway() {
   fs.mkdirSync(STATE_DIR, { recursive: true });
   fs.mkdirSync(WORKSPACE_DIR, { recursive: true });
 
+  // Ensure gateway config is properly set (fixes openclaw rename migration)
+  console.log("[gateway] ensuring config is set correctly...");
+  await runCmd(MOLTBOT_NODE, clawArgs(["config", "set", "gateway.mode", "local"]));
+  await runCmd(MOLTBOT_NODE, clawArgs(["config", "set", "gateway.auth.mode", "token"]));
+  await runCmd(MOLTBOT_NODE, clawArgs(["config", "set", "gateway.auth.token", MOLTBOT_GATEWAY_TOKEN]));
+  await runCmd(MOLTBOT_NODE, clawArgs(["config", "set", "gateway.bind", "loopback"]));
+  await runCmd(MOLTBOT_NODE, clawArgs(["config", "set", "gateway.port", String(INTERNAL_GATEWAY_PORT)]));
+  await runCmd(MOLTBOT_NODE, clawArgs(["config", "set", "gateway.controlUi.allowInsecureAuth", "true"]));
+  console.log("[gateway] config set complete");
+
   const args = [
     "gateway",
     "run",
@@ -128,7 +138,6 @@ async function startGateway() {
     "token",
     "--token",
     MOLTBOT_GATEWAY_TOKEN,
-    "--allow-unconfigured",
   ];
 
   gatewayProc = childProcess.spawn(MOLTBOT_NODE, clawArgs(args), {
