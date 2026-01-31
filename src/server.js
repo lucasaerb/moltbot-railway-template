@@ -10,10 +10,13 @@ import * as tar from "tar";
 
 // Railway commonly sets PORT=8080 for HTTP services.
 const PORT = Number.parseInt(process.env.PORT ?? "8080", 10);
+// Support both MOLTBOT_* and OPENCLAW_* env var names for compatibility
 const STATE_DIR =
+  process.env.OPENCLAW_STATE_DIR?.trim() ||
   process.env.MOLTBOT_STATE_DIR?.trim() ||
   path.join(os.homedir(), ".moltbot");
 const WORKSPACE_DIR =
+  process.env.OPENCLAW_WORKSPACE_DIR?.trim() ||
   process.env.MOLTBOT_WORKSPACE_DIR?.trim() ||
   path.join(STATE_DIR, "workspace");
 
@@ -23,7 +26,7 @@ const SETUP_PASSWORD = process.env.SETUP_PASSWORD?.trim();
 // Gateway admin token (protects Moltbot gateway + Control UI).
 // Must be stable across restarts. If not provided via env, persist it in the state dir.
 function resolveGatewayToken() {
-  const envTok = process.env.MOLTBOT_GATEWAY_TOKEN?.trim();
+  const envTok = process.env.OPENCLAW_GATEWAY_TOKEN?.trim() || process.env.MOLTBOT_GATEWAY_TOKEN?.trim();
   if (envTok) return envTok;
 
   const tokenPath = path.join(STATE_DIR, "gateway.token");
@@ -45,7 +48,11 @@ function resolveGatewayToken() {
 }
 
 const MOLTBOT_GATEWAY_TOKEN = resolveGatewayToken();
+// Set both MOLTBOT_* and OPENCLAW_* env vars for compatibility
 process.env.MOLTBOT_GATEWAY_TOKEN = MOLTBOT_GATEWAY_TOKEN;
+process.env.OPENCLAW_GATEWAY_TOKEN = MOLTBOT_GATEWAY_TOKEN;
+process.env.OPENCLAW_STATE_DIR = STATE_DIR;
+process.env.OPENCLAW_WORKSPACE_DIR = WORKSPACE_DIR;
 
 // Where the gateway will listen internally (we proxy to it).
 const INTERNAL_GATEWAY_PORT = Number.parseInt(
@@ -144,8 +151,12 @@ async function startGateway() {
     stdio: "inherit",
     env: {
       ...process.env,
+      // Set both MOLTBOT_* and OPENCLAW_* for compatibility with rename
       MOLTBOT_STATE_DIR: STATE_DIR,
       MOLTBOT_WORKSPACE_DIR: WORKSPACE_DIR,
+      OPENCLAW_STATE_DIR: STATE_DIR,
+      OPENCLAW_WORKSPACE_DIR: WORKSPACE_DIR,
+      OPENCLAW_GATEWAY_TOKEN: MOLTBOT_GATEWAY_TOKEN,
     },
   });
 
@@ -511,8 +522,12 @@ function runCmd(cmd, args, opts = {}) {
       ...opts,
       env: {
         ...process.env,
+        // Set both MOLTBOT_* and OPENCLAW_* for compatibility with rename
         MOLTBOT_STATE_DIR: STATE_DIR,
         MOLTBOT_WORKSPACE_DIR: WORKSPACE_DIR,
+        OPENCLAW_STATE_DIR: STATE_DIR,
+        OPENCLAW_WORKSPACE_DIR: WORKSPACE_DIR,
+        OPENCLAW_GATEWAY_TOKEN: MOLTBOT_GATEWAY_TOKEN,
       },
     });
 
