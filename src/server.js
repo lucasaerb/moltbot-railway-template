@@ -914,8 +914,7 @@ app.post("/setup/api/config/set", requireSetupAuth, async (req, res) => {
 
 app.post("/setup/api/gateway/restart", requireSetupAuth, async (_req, res) => {
   try {
-    await stopGateway();
-    await startGateway();
+    await restartGateway();
     res.json({ ok: true, message: "Gateway restarted" });
   } catch (err) {
     res.status(500).json({ ok: false, error: String(err) });
