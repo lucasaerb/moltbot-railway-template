@@ -387,6 +387,12 @@ app.get("/setup/api/status", requireSetupAuth, async (_req, res) => {
       ],
     },
     {
+      value: "xai",
+      label: "xAI",
+      hint: "Grok API key",
+      options: [{ value: "xai-api-key", label: "xAI (Grok) API key" }],
+    },
+    {
       value: "openrouter",
       label: "OpenRouter",
       hint: "API key",
@@ -401,11 +407,20 @@ app.get("/setup/api/status", requireSetupAuth, async (_req, res) => {
       ],
     },
     {
+      value: "cloudflare-ai-gateway",
+      label: "Cloudflare AI Gateway",
+      hint: "API key",
+      options: [
+        { value: "cloudflare-ai-gateway-api-key", label: "Cloudflare AI Gateway API key" },
+      ],
+    },
+    {
       value: "moonshot",
       label: "Moonshot AI",
       hint: "Kimi K2 + Kimi Code",
       options: [
         { value: "moonshot-api-key", label: "Moonshot AI API key" },
+        { value: "moonshot-api-key-cn", label: "Moonshot AI API key (China)" },
         { value: "kimi-code-api-key", label: "Kimi Code API key" },
       ],
     },
@@ -416,12 +431,20 @@ app.get("/setup/api/status", requireSetupAuth, async (_req, res) => {
       options: [{ value: "zai-api-key", label: "Z.AI (GLM 4.7) API key" }],
     },
     {
+      value: "xiaomi",
+      label: "Xiaomi",
+      hint: "API key",
+      options: [{ value: "xiaomi-api-key", label: "Xiaomi API key" }],
+    },
+    {
       value: "minimax",
       label: "MiniMax",
       hint: "M2.1 (recommended)",
       options: [
         { value: "minimax-api", label: "MiniMax M2.1" },
         { value: "minimax-api-lightning", label: "MiniMax M2.1 Lightning" },
+        { value: "minimax-cloud", label: "MiniMax Cloud" },
+        { value: "minimax-portal", label: "MiniMax Portal" },
       ],
     },
     {
@@ -429,6 +452,12 @@ app.get("/setup/api/status", requireSetupAuth, async (_req, res) => {
       label: "Qwen",
       hint: "OAuth",
       options: [{ value: "qwen-portal", label: "Qwen OAuth" }],
+    },
+    {
+      value: "qianfan",
+      label: "Baidu Qianfan",
+      hint: "API key",
+      options: [{ value: "qianfan-api-key", label: "Baidu Qianfan API key" }],
     },
     {
       value: "copilot",
@@ -447,6 +476,12 @@ app.get("/setup/api/status", requireSetupAuth, async (_req, res) => {
       label: "Synthetic",
       hint: "Anthropic-compatible (multi-model)",
       options: [{ value: "synthetic-api-key", label: "Synthetic API key" }],
+    },
+    {
+      value: "venice",
+      label: "Venice AI",
+      hint: "API key",
+      options: [{ value: "venice-api-key", label: "Venice AI API key" }],
     },
     {
       value: "opencode-zen",
@@ -500,13 +535,21 @@ function buildOnboardArgs(payload) {
       apiKey: "--anthropic-api-key",
       "openrouter-api-key": "--openrouter-api-key",
       "ai-gateway-api-key": "--ai-gateway-api-key",
+      "cloudflare-ai-gateway-api-key": "--cloudflare-ai-gateway-api-key",
       "moonshot-api-key": "--moonshot-api-key",
+      "moonshot-api-key-cn": "--moonshot-api-key",
       "kimi-code-api-key": "--kimi-code-api-key",
       "gemini-api-key": "--gemini-api-key",
+      "xai-api-key": "--xai-api-key",
       "zai-api-key": "--zai-api-key",
+      "xiaomi-api-key": "--xiaomi-api-key",
       "minimax-api": "--minimax-api-key",
       "minimax-api-lightning": "--minimax-api-key",
+      "minimax-cloud": "--minimax-api-key",
+      "minimax-portal": "--minimax-api-key",
+      "qianfan-api-key": "--qianfan-api-key",
       "synthetic-api-key": "--synthetic-api-key",
+      "venice-api-key": "--venice-api-key",
       "opencode-zen": "--opencode-zen-api-key",
     };
     const flag = map[payload.authChoice];
