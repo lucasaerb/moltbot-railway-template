@@ -883,6 +883,45 @@ app.post("/setup/api/pairing/approve", requireSetupAuth, async (req, res) => {
     .json({ ok: r.code === 0, output: r.output });
 });
 
+// Config management API
+app.get("/setup/api/config", requireSetupAuth, async (_req, res) => {
+  try {
+    const cfg = configPath();
+    if (!fs.existsSync(cfg)) {
+      return res.status(404).json({ error: "Config not found" });
+    }
+    const config = JSON.parse(fs.readFileSync(cfg, "utf8"));
+    res.json(config);
+  } catch (err) {
+    res.status(500).json({ error: String(err) });
+  }
+});
+
+app.post("/setup/api/config/set", requireSetupAuth, async (req, res) => {
+  const { key, value } = req.body || {};
+  if (!key) {
+    return res.status(400).json({ ok: false, error: "Missing key" });
+  }
+  const args = ["config", "set", key];
+  if (value !== undefined) {
+    args.push(typeof value === "string" ? value : JSON.stringify(value));
+  }
+  const r = await runCmd(OPENCLAW_NODE, clawArgs(args));
+  return res
+    .status(r.code === 0 ? 200 : 500)
+    .json({ ok: r.code === 0, output: r.output });
+});
+
+app.post("/setup/api/gateway/restart", requireSetupAuth, async (_req, res) => {
+  try {
+    await stopGateway();
+    await startGateway();
+    res.json({ ok: true, message: "Gateway restarted" });
+  } catch (err) {
+    res.status(500).json({ ok: false, error: String(err) });
+  }
+});
+
 app.post("/setup/api/reset", requireSetupAuth, async (_req, res) => {
   // Minimal reset: delete the config file so /setup can rerun.
   // Keep credentials/sessions/workspace by default.
