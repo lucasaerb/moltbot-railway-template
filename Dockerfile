@@ -73,6 +73,13 @@ USER root
 RUN chown -R root:root /home/linuxbrew/.linuxbrew
 ENV PATH="/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:${PATH}"
 
+# Install uv (required for nano-banana-pro and other Python-based skills)
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh
+ENV PATH="/root/.local/bin:${PATH}"
+
+# Pre-install Python tools for skills
+RUN /root/.local/bin/uv tool install nano-pdf
+
 WORKDIR /app
 
 # Wrapper deps
