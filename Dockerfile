@@ -1,7 +1,7 @@
 # Build openclaw from source to avoid npm packaging gaps (some dist files are not shipped).
 # Fresh build required - 2026-02-09T15:25
 ARG CACHE_DATE=2026-02-09
-FROM node:22-bookworm AS openclaw-build
+FROM node:22-bookworm AS claw-builder
 RUN echo "Cache bust: ${CACHE_DATE}"
 
 # Dependencies needed for openclaw build
@@ -81,7 +81,7 @@ COPY package.json pnpm-lock.yaml ./
 RUN pnpm install --prod --frozen-lockfile && pnpm store prune
 
 # Copy built openclaw
-COPY --from=openclaw-build /openclaw /openclaw
+COPY --from=claw-builder /openclaw /openclaw
 
 # Provide a openclaw executable
 RUN printf '%s\n' '#!/usr/bin/env bash' 'exec node /openclaw/dist/entry.js "$@"' > /usr/local/bin/openclaw \
