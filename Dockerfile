@@ -1,6 +1,8 @@
 # Build openclaw from source to avoid npm packaging gaps (some dist files are not shipped).
-# Cache bust: 2026-02-09
+# Fresh build required - 2026-02-09T15:25
+ARG CACHE_DATE=2026-02-09
 FROM node:22-bookworm AS openclaw-build
+RUN echo "Cache bust: ${CACHE_DATE}"
 
 # Dependencies needed for openclaw build
 RUN apt-get update \
